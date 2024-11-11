@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UML Diagram Editor</title>
+
+    <!-- JointJS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@joint/core@4.0.1/dist/joint.js"></script>
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f9fc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        .container {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .palette {
+            width: 200px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-right: 20px;
+        }
+
+        .palette h3 {
+            font-size: 18px;
+            color: #444;
+        }
+
+        .shape {
+            width: 100%;
+            height: 40px;
+            background-color: #4a90e2;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .shape:hover {
+            background-color: #357ABD;
+        }
+
+        #uml-diagram-container {
+            width: 800px;
+            height: 600px;
+            background-color: #ffffff;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .buttons {
+            margin-top: 10px;
+        }
+
+        .buttons button {
+            padding: 8px 16px;
+            background-color: #4a90e2;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .buttons button:hover {
+            background-color: #357ABD;
+        }
+    </style>
+</head>
+<body>
+
+<h1>UML Diagram Editor</h1>
+
+<div class="container">
+    <!-- Palette for UML shapes -->
+    <div class="palette">
+        <h3>Palette</h3>
+        <div class="shape" id="addRectangle">Rectangle</div>
+        <div class="shape" id="addCircle">Circle</div>
+        <div class="shape" id="addEllipse">Ellipse</div>
+        <div class="shape" id="addLink">Link</div>
+        <div class="shape" id="addClass">Class</div>
+    </div>
+
+    <!-- UML Diagram Container -->
+    <div id="uml-diagram-container"></div>
+</div>
+
+<!-- Buttons to save/load the diagram -->
+<div class="buttons">
+    <button onclick="saveDiagram()">Save Diagram</button>
+    <button onclick="loadDiagram()">Load Diagram</button>
+</div>
+
+<script>
+    // Initialize the graph (this holds all UML elements)
+    var graph = new joint.dia.Graph();
+
+    // Create the paper (canvas) to display the diagram
+    var paper = new joint.dia.Paper({
+        el: document.getElementById('uml-diagram-container'),
+        model: graph,
+        width: 800,
+        height: 600,
+        gridSize: 10,
+        drawGrid: true,
+        background: {
+            color: '#f7f7f7'
+        }
+    });
+
+    // Add shapes to the graph when clicking on the palette
+    document.getElementById('addRectangle').addEventListener('click', function() {
+        var rect = new joint.shapes.standard.Rectangle();
+        rect.position(50, 50).resize(100, 40);
+        rect.attr({
+            body: { fill: '#4a90e2', strokeWidth: 2 },
+            label: { text: 'Rectangle', fill: '#ffffff' }
+        });
+        graph.addCell(rect);
+    });
+
+    document.getElementById('addCircle').addEventListener('click', function() {
+        var circle = new joint.shapes.standard.Circle();
+        circle.position(50, 50).resize(60, 60);
+        circle.attr({
+            body: { fill: '#4a90e2', strokeWidth: 2 },
+            label: { text: 'Circle', fill: '#ffffff' }
+        });
+        graph.addCell(circle);
+    });
+
+    document.getElementById('addEllipse').addEventListener('click', function() {
+        var ellipse = new joint.shapes.standard.Ellipse();
+        ellipse.position(50, 50).resize(100, 60);
+        ellipse.attr({
+            body: { fill: '#4a90e2', strokeWidth: 2 },
+            label: { text: 'Ellipse', fill: '#ffffff' }
+        });
+        graph.addCell(ellipse);
+    });
+
+    document.getElementById('addLink').addEventListener('click', function() {
+        var link = new joint.shapes.standard.Link();
+        link.source({ x: 50, y: 50 });
+        link.target({ x: 200, y: 200 });
+        graph.addCell(link);
+    });
+
+    document.getElementById('addClass').addEventListener('click', function() {
+        var umlClass = new joint.shapes.uml.Class({
+            position: { x: 50, y: 50 },
+            size: { width: 200, height: 100 },
+            name: 'ClassName',
+            attributes: ['+ attribute1', '+ attribute2'],
+            methods: ['+ method1()', '+ method2()']
+        });
+        graph.addCell(umlClass);
+    });
+
+    // Function to save the current diagram to the server (Spring Boot backend)
+    function saveDiagram() {
+        var diagramJson = JSON.stringify(graph.toJSON());
+        console.log('Saving diagram:', diagramJson);
+
+        fetch('/api/uml/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: diagramJson
+        }).then(response => response.json())
+            .then(data => { console.log('Diagram saved:', data); });
+    }
+
+    // Function to load a previously saved diagram from the server
+    function loadDiagram() {
+        fetch('/api/uml/load', {
+            method: 'GET'
+        }).then(response => response.json())
+            .then(data => {
+                console.log('Loading diagram:', data);
+                graph.fromJSON(data);
+            });
+    }
+</script>
+
+</body>
+</html>

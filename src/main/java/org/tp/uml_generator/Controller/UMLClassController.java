@@ -29,7 +29,7 @@ public class UMLClassController {
 
     @PostMapping
     public UMLClass createClass(@RequestBody UMLClass umlClass) {
-        umlClassService.CreatClassFile(umlClass);
+
         return umlClassService.createOrUpdateClass(umlClass);
     }
 

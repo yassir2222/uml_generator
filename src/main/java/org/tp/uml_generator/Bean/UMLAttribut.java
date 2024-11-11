@@ -1,9 +1,6 @@
 package org.tp.uml_generator.Bean;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -17,4 +14,5 @@ public class UMLAttribut {
     private String name;
     private String type;
     private String visibility;
+
 }

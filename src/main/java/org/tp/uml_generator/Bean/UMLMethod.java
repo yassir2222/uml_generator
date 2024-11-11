@@ -18,6 +18,7 @@ public class UMLMethod {
     private String returnType;
     private String visibility;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<UMLParameter> parameters = new ArrayList<>();
+
 }
